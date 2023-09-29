@@ -8,7 +8,8 @@
   :source-control (:git "https://github.com/certainty/cl-tui.git")
   :pathname "src"
   :serial t
-  :components ((:file "tui")))
+  :components ((:file "tui"))
+  :in-order-to ((test-op (test-op :cl-tui/test))))
 
 (defsystem "cl-tui/test"
   :pathname "tests"
