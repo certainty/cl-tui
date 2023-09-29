@@ -8,12 +8,11 @@
   :source-control (:git "https://github.com/certainty/cl-tui.git")
   :pathname "src"
   :serial t
-  :components ((:file "tui"))
-  :in-order-to ((test-op (test-op :cli-tui/test))))
+  :components ((:file "tui")))
 
 (defsystem "cl-tui/test"
   :pathname "tests"
-  :defsystem-depends-on ("fiveam-asdf")
-  :depends-on ("cl-tui" "fiveam")
+  :depends-on (:cl-tui :rove)
   :serial t
-  :components ((:file "test")))
+  :components ((:file "test"))
+  :perform (test-op (op c) (symbol-call :rove :run c)))

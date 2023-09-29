@@ -18,6 +18,7 @@ Another solution to run the app is to build and run a binary (see README).
 (ql:quickload "cl-tui")
 
 (in-package :cl-tui)
+
 (handler-case
     (main)
   (error (c)
