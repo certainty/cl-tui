@@ -1,26 +1,29 @@
-name: "CI"
+name: CI
 
 on:
   push:
-    branches:
-      - "main"
+    branches: ["*"]
   pull_request:
+    branches: ["*"]
+  workflow_dispatch:
 
 jobs:
-  tests:
+  build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        lisp:
-          - sbcl-bin
-    env:
-      LISP: ${{ matrix.lisp }}
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: 40ants/setup-lisp@v2
-        with:
-          asdf-system: cl-tui
-      - uses: 40ants/run-tests@v2
-        with:
-          asdf-system: cl-tui
+      - uses: actions/checkout@v3
+      - name: Install Roswell
+        run: |
+          curl -L https://raw.githubusercontent.com/roswell/roswell/v22.12.14.113/scripts/install-for-ci.sh | sh
+      - name: Run test
+        run: |
+          set -ex
+
+          ros config set dynamic-space-size 2048
+          curl -L https://qlot.tech/installer | bash
+          export PATH="/home/runner/.qlot/bin:$PATH"
+
+          qlot install
+
+          make test
