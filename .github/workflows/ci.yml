@@ -15,6 +15,11 @@ jobs:
       - name: Install Roswell
         run: |
           curl -L https://raw.githubusercontent.com/roswell/roswell/v22.12.14.113/scripts/install-for-ci.sh | sh
+
+      - name: Install dependencies
+        run: |
+          make install-deps
+
       - name: Run test
         run: |
           set -ex
