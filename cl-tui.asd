@@ -7,7 +7,7 @@
   :source-control (:git "https://github.com/certainty/cl-tui.git")
   :serial t
   :pathname "src"
-  :depends-on (:cl-tui/terminal)
+  :depends-on (:cl-async :cl-tui/terminal)
   :components ((:file "tui"))
   :in-order-to ((test-op (test-op  "cl-tui/tests"))))
 

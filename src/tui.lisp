@@ -1,5 +1,5 @@
 (defpackage :cl-tui
-  (:use :cl))
+  (:use :cl :cl-tui/terminal :cl-interpol))
 
 (in-package :cl-tui)
 
@@ -8,8 +8,6 @@
 
 #-production
 (declaim (optimize (safety 3) (debug 3) (speed 1)))
-
-(defparameter *console-io* *terminal-io*)
 
 (defgeneric init (model)
   (:documentation "Initialize the model and optionally emit commands"))
@@ -37,11 +35,23 @@
   (let ((program (make-instance 'program :initial-model model)))
     (run-event-loop program)))
 
+
 (defun run-event-loop (program)
   ;; read messages from queue
   ;; update the model
   ;; dispatch any commands
   ;; do it all over again
+  (cl-tui/terminal:with-alternate-screen
+      (cl-tui/terminal:with-raw-term
+          (as:with-event-loop (:catch-app-errors t)
+            ;; exit the event loop on sig term
+            (as:signal-handler as:+sigint+ (lambda (sig)
+                                             (declare (ignore sig))
+                                             (as:exit-event-loop)))
+            (as:with-interval (2)
+              (format t "Next ...~%")))))
+  ;; make sure terminal gets back into normal mode
+
   )
 
 ;; let's try this immediatly
@@ -59,3 +69,7 @@
   (defc (value model) (decrement-msg-amount msg)))
 
 (defvar main-program (make-instance 'program :initial-model (make-instance 'counter :value 5)))
+
+(defun run-example ()
+  (let ((program main-program))
+    (run-event-loop program)))

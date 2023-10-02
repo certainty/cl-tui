@@ -1,5 +1,7 @@
 (in-package :cl-tui/terminal)
-;; (in-readtable :interpol-syntax)
+(named-readtables:in-readtable :interpol-syntax)
+
+(defparameter *term-output* *standard-output* "The terminal output stream.")
 
 (defun term-raw ()
   "Place the terminal into 'raw' mode, no echo or delete.
@@ -34,6 +36,14 @@ See 'man 3 termios' for more information."
                   sb-posix:echok
                   sb-posix:echonl))
     (sb-posix:tcsetattr 0 sb-posix:TCSANOW options)))
+
+(defmacro with-raw-term (&body body)
+  "Execute BODY with the terminal in raw mode."
+  `(progn
+     (term-raw)
+     (unwind-protect
+          (progn ,@body)
+       (term-unraw))))
 
 ;; retrieve terminal size
 (define-foreign-type ioctl-result-type ()
@@ -73,3 +83,25 @@ ypixels.  See `man 2 ioctl` for more inforamtion.  Note ioctl and thus
         :col 0
         :xpixel 0
         :ypixel 0))))
+
+;; screen handling and escape sequences
+;; TODO: these should be constants really
+(defvar +term-clear+ #?"\x1b[H[2J" "clear the scren")
+(defvar +term-alternate-screen+ #?"\x1b[?1049h" "enter alternate screen")
+(defvar +term-normal-screen+ #?"\x1b[?1049l" "leave alternate screen")
+
+(defun enter-alternate-screen ()
+  (write-sequence +term-alternate-screen+ *term-output*)
+  (write-sequence +term-clear+ *term-output*)
+  (finish-output *term-output*))
+
+(defun leave-alternate-screen ()
+  (write-sequence +term-normal-screen+ *term-output*)
+  (finish-output *term-output*))
+
+(defmacro with-alternate-screen (&body body)
+  `(progn
+     (enter-alternate-screen)
+     (unwind-protect
+          (progn ,@body)
+       (leave-alternate-screen))))
