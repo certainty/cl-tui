@@ -1,14 +1,13 @@
-.PHONY: test install-deps update-deps bootstrap-dev-env
+RUN_LISP=sbcl --noinform --non-interactive
+LISP=sbcl --noinform
 
-test: install-deps
-	.qlot/bin/rove cl-tui.asd
+test:
+	$(RUN_LISP) --non-interactive --eval '(asdf:test-system :cl-tui)'
 
-install-deps:
-	qlot install
+repl:
+	$(LISP)	--eval '(ql:quickload :cl-tui)'
 
-update-deps:
-	qlot update
+build:
+	$(RUN_LISP) --eval '(asdf:make :cl-tui)'
 
-bootstrap-dev-env:
-	ros install sbcl
-	ros install fukamachi/qlot
+.PHONY: test repl
